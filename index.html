@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Google Image Prompt Studio</title>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --panel: #151923;
+      --panel-2: #1c2230;
+      --panel-3: #232b3a;
+      --text: #f3f6fb;
+      --muted: #aab4c3;
+      --soft: #788396;
+      --line: #2c3548;
+      --accent: #8ab4ff;
+      --accent-2: #c58bff;
+      --good: #8ff0c6;
+      --warn: #ffd27a;
+      --danger: #ff8a9a;
+      --shadow: 0 24px 80px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(138,180,255,.22), transparent 34rem),
+        radial-gradient(circle at top right, rgba(197,139,255,.16), transparent 30rem),
+        linear-gradient(180deg, #0d0f14 0%, #10131b 45%, #0b0d12 100%);
+      min-height: 100vh;
+    }
+
+    .app {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .hero, .quick-card, .section, .output-card {
+      background: rgba(21,25,35,.86);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -130px auto;
+      width: 300px;
+      height: 300px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(138,180,255,.2), transparent 68%);
+      pointer-events: none;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 4.2rem);
+      line-height: .95;
+      letter-spacing: -0.07em;
+    }
+
+    .subtitle {
+      max-width: 820px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.55;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .badge {
+      border: 1px solid rgba(255,255,255,.1);
+      color: #dfe8ff;
+      background: rgba(255,255,255,.055);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: .78rem;
+    }
+
+    .quick-card {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 220px;
+    }
+
+    .quick-card h2, .section h2, .output-card h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      letter-spacing: .02em;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.45;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .section {
+      padding: 18px;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .mode-btn {
+      width: 100%;
+      text-align: left;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 13px;
+      cursor: pointer;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+    }
+
+    .mode-btn:hover { transform: translateY(-1px); border-color: rgba(138,180,255,.5); }
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(138,180,255,.18), rgba(197,139,255,.13));
+      border-color: rgba(138,180,255,.65);
+    }
+
+    .mode-btn strong { display: block; font-size: .92rem; margin-bottom: 4px; }
+    .mode-btn span { color: var(--muted); font-size: .8rem; line-height: 1.35; display: block; }
+
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      margin: 0 0 6px;
+      color: #dbe4f4;
+      font-size: .82rem;
+      font-weight: 650;
+    }
+
+    label small {
+      color: var(--soft);
+      font-weight: 500;
+      font-size: .72rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(9,11,16,.72);
+      color: var(--text);
+      padding: 11px 12px;
+      outline: none;
+      font: inherit;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    textarea { min-height: 94px; resize: vertical; line-height: 1.45; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(138,180,255,.12);
+    }
+
+    .toggle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.035);
+      border-radius: 12px;
+      padding: 9px 10px;
+      color: var(--muted);
+      font-size: .82rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .check input { width: auto; accent-color: var(--accent); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button.primary, button.secondary, button.ghost {
+      border: 0;
+      border-radius: 13px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform .15s ease, filter .15s ease, background .15s ease;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #77a7ff, #bd7cff);
+      color: #08101d;
+    }
+
+    button.secondary { background: var(--panel-3); border: 1px solid var(--line); }
+    button.ghost { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+    button:hover { transform: translateY(-1px); filter: brightness(1.06); }
+
+    .output-card {
+      padding: 18px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .output-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .score {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: .78rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: rgba(255,255,255,.04);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--good);
+      box-shadow: 0 0 16px rgba(143,240,198,.7);
+    }
+
+    #output {
+      min-height: 560px;
+      background: #090b10;
+      border: 1px solid var(--line);
+      color: #eef4ff;
+      border-radius: 15px;
+      padding: 15px;
+      white-space: pre-wrap;
+      line-height: 1.48;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: .88rem;
+    }
+
+    .mini-output {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .mini {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.035);
+      border-radius: 14px;
+      padding: 12px;
+      min-height: 92px;
+    }
+
+    .mini strong { display: block; font-size: .78rem; margin-bottom: 7px; color: #dce6fa; }
+    .mini p { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.38; }
+
+    .hidden { display: none !important; }
+
+    .pill-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.45;
+      border-left: 3px solid var(--accent);
+      padding-left: 10px;
+    }
+
+    .preset-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .preset {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      border-radius: 12px;
+      padding: 10px;
+      text-align: left;
+      cursor: pointer;
+      font-size: .82rem;
+    }
+
+    .preset:hover { border-color: rgba(138,180,255,.55); color: var(--text); }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      background: #101723;
+      border: 1px solid rgba(138,180,255,.35);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: .2s ease;
+      z-index: 10;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1180px) {
+      header, .layout, .main { grid-template-columns: 1fr; }
+      .sidebar, .output-card { position: static; }
+    }
+
+    @media (max-width: 700px) {
+      .app { padding: 16px; }
+      .fields, .toggle-grid, .mini-output { grid-template-columns: 1fr; }
+      h1 { font-size: 2.3rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <section class="hero">
+        <h1>Google Image Prompt Studio</h1>
+        <p class="subtitle">A structured prompt builder tuned for Google’s image generation strengths: controlled edits, character consistency, image fusion, clean photorealism, typography, and series continuity. Less chaos goblin, more precision spellbook.</p>
+        <div class="badge-row">
+          <span class="badge">Create</span>
+          <span class="badge">Edit Existing Image</span>
+          <span class="badge">Fusion</span>
+          <span class="badge">Series Continuity</span>
+          <span class="badge">Text / Poster</span>
+          <span class="badge">No Text Guardrails</span>
+        </div>
+      </section>
+      <aside class="quick-card">
+        <div>
+          <h2>Prompt philosophy</h2>
+          <p class="hint">Google tends to reward clear roles, preservation rules, camera logic, and exact instructions. This app outputs prompts with strong hierarchy instead of giant descriptor soup.</p>
+        </div>
+        <div class="actions">
+          <button class="secondary" id="saveLocalBtn">Save Settings</button>
+          <button class="ghost" id="loadLocalBtn">Load Settings</button>
+        </div>
+      </aside>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <section class="section">
+          <h2>Mode</h2>
+          <div class="mode-grid">
+            <button class="mode-btn active" data-mode="create"><strong>Create Mode</strong><span>Build a fresh image from subject, scene, camera, lighting, and rules.</span></button>
+            <button class="mode-btn" data-mode="edit"><strong>Edit Mode</strong><span>Change uploaded images while preserving identity, composition, and style.</span></button>
+            <button class="mode-btn" data-mode="fusion"><strong>Fusion Mode</strong><span>Combine person, outfit, product, scene, and style references.</span></button>
+            <button class="mode-btn" data-mode="series"><strong>Series Mode</strong><span>Keep recurring characters, bots, locations, or transmissions consistent.</span></button>
+            <button class="mode-btn" data-mode="text"><strong>Text / Poster Mode</strong><span>Use exact title text, labels, packaging, covers, and typography.</span></button>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Fast presets</h2>
+          <div class="preset-list">
+            <button class="preset" data-preset="photoreal-fashion">Photoreal fashion portrait</button>
+            <button class="preset" data-preset="cinematic-environment">Cinematic no-people environment</button>
+            <button class="preset" data-preset="outfit-transfer">Outfit transfer onto subject</button>
+            <button class="preset" data-preset="noir-monochrome">Black and white street portrait</button>
+            <button class="preset" data-preset="clean-product">Clean product mockup</button>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2>Global rules</h2>
+          <div class="toggle-grid">
+            <label class="check"><input type="checkbox" id="ruleNoText" checked /> No text</label>
+            <label class="check"><input type="checkbox" id="ruleNoLogos" checked /> No logos</label>
+            <label class="check"><input type="checkbox" id="ruleNoWatermark" checked /> No watermark</label>
+            <label class="check"><input type="checkbox" id="ruleNoSignage" checked /> No signage</label>
+            <label class="check"><input type="checkbox" id="ruleNoExtraLimbs" checked /> No extra limbs</label>
+            <label class="check"><input type="checkbox" id="ruleNaturalHands" checked /> Natural hands</label>
+          </div>
+          <p class="pill-note">In Text / Poster Mode, “No text” automatically becomes “no extra text except the exact requested text.”</p>
+        </section>
+      </aside>
+
+      <main class="main">
+        <div class="form-stack">
+          <section class="section">
+            <h2>Core image brief</h2>
+            <div class="fields">
+              <div class="field full">
+                <label for="subject">Subject <small>main visual anchor</small></label>
+                <textarea id="subject" placeholder="Example: an adult woman with thick black wavy hair, calm confident expression, glossy black structured jacket"></textarea>
+              </div>
+              <div class="field full">
+                <label for="context">Context / environment <small>where it happens</small></label>
+                <textarea id="context" placeholder="Example: neon-lit elevated walkway in a near-future city at night, layered urban depth, wet pavement"></textarea>
+              </div>
+              <div>
+                <label for="purpose">Purpose</label>
+                <select id="purpose">
+                  <option value="editorial image">Editorial image</option>
+                  <option value="cinematic still">Cinematic still</option>
+                  <option value="wallpaper">Wallpaper</option>
+                  <option value="product mockup">Product mockup</option>
+                  <option value="album cover">Album cover</option>
+                  <option value="poster design">Poster design</option>
+                  <option value="story moment">Story moment</option>
+                  <option value="social media post">Social media post</option>
+                  <option value="infographic">Infographic</option>
+                </select>
+              </div>
+              <div>
+                <label for="aspect">Aspect ratio</label>
+                <select id="aspect">
+                  <option value="9:16 vertical">9:16 vertical</option>
+                  <option value="4:5 vertical">4:5 vertical</option>
+                  <option value="2:3 vertical">2:3 vertical</option>
+                  <option value="16:9 widescreen">16:9 widescreen</option>
+                  <option value="1:1 square">1:1 square</option>
+                  <option value="3:2 landscape">3:2 landscape</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2>Visual direction</h2>
+            <div class="fields">
+              <div>
+                <label for="style">Style</label>
+                <select id="style">
+                  <option value="photorealistic, polished mirrorless sharpness">Photoreal mirrorless</option>
+                  <option value="high-end fashion editorial, premium campaign look">Fashion editorial</option>
+                  <option value="cinematic realism, film-still atmosphere">Cinematic realism</option>
+                  <option value="retro VHS texture, analog distortion, scanline artifacts">Retro VHS</option>
+                  <option value="clean commercial product photography">Commercial product</option>
+                  <option value="minimalist street photography, quiet texture and light">Minimalist street photography</option>
+                  <option value="mixed-media surrealism, layered textures, dreamlike transitions">Mixed-media surreal</option>
+                  <option value="high-tech futuristic interface aesthetic">Futuristic interface</option>
+                </select>
+              </div>
+              <div>
+                <label for="mood">Mood</label>
+                <select id="mood">
+                  <option value="calm, refined, intentional">Calm / refined</option>
+                  <option value="dangerous, menacing, dreamlike">Dangerous / dreamlike</option>
+                  <option value="futuristic, psychedelic, polished">Futuristic / psychedelic</option>
+                  <option value="warm, nostalgic, emotionally grounded">Warm / nostalgic</option>
+                  <option value="eerie, elegant, quietly unsettling">Eerie / elegant</option>
+                  <option value="bright, clean, optimistic">Bright / clean</option>
+                  <option value="dark, glossy, high-contrast">Dark / glossy</option>
+                </select>
+              </div>
+              <div>
+                <label for="camera">Camera</label>
+                <select id="camera">
+                  <option value="135mm telephoto, eye-level perspective, shallow depth of field">135mm telephoto</option>
+                  <option value="85mm portrait lens, natural compression, shallow depth of field">85mm portrait</option>
+                  <option value="50mm lens, natural human viewpoint">50mm natural</option>
+                  <option value="corrected wide-angle lens with minimal distortion">Corrected wide-angle</option>
+                  <option value="low-angle cinematic perspective">Low-angle cinematic</option>
+                  <option value="wide establishing shot with strong depth cues">Wide establishing</option>
+                  <option value="macro detail shot, crisp texture focus">Macro detail</option>
+                </select>
+              </div>
+              <div>
+                <label for="lighting">Lighting</label>
+                <select id="lighting">
+                  <option value="soft natural light with realistic shadows">Soft natural</option>
+                  <option value="golden hour sunlight, long shadows, luminous highlights">Golden hour</option>
+                  <option value="dramatic rim light with rich shadow contrast">Dramatic rim light</option>
+                  <option value="cool ambient light with warm edge highlights">Cool ambient + warm rim</option>
+                  <option value="high contrast monochrome lighting">High contrast monochrome</option>
+                  <option value="bright airy daylight, clean reflections">Bright airy daylight</option>
+                  <option value="moody indoor practical lighting">Moody indoor practical</option>
+                </select>
+              </div>
+              <div>
+                <label for="palette">Color palette</label>
+                <input id="palette" placeholder="Example: burgundy and cream, orange and teal, black and white" />
+              </div>
+              <div>
+                <label for="detail">Detail level</label>
+                <select id="detail">
+                  <option value="richly detailed but visually readable">Rich but readable</option>
+                  <option value="clean, minimal, uncluttered">Clean / minimal</option>
+                  <option value="ultra-detailed with layered textures">Ultra-detailed</option>
+                  <option value="simple, commercial, polished">Commercial clean</option>
+                  <option value="distressed, tactile, grainy, textured">Distressed / tactile</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label for="extraDetails">Important details <small>materials, gestures, motifs, props</small></label>
+                <textarea id="extraDetails" placeholder="Example: glossy black fabric, subtle chrome accents, wet pavement reflections, layered haze, natural fabric folds"></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="section mode-panel" data-panel="edit">
+            <h2>Edit Mode controls</h2>
+            <div class="fields">
+              <div class="field full">
+                <label for="editChange">Requested change</label>
+                <textarea id="editChange" placeholder="Example: change only the outfit to a structured yellow high-fashion ensemble"></textarea>
+              </div>
+              <div class="field full">
+                <label for="preserve">Preserve from uploaded image</label>
+                <textarea id="preserve" placeholder="Example: identity, facial features, body proportions, pose, camera angle, lighting direction, background composition"></textarea>
+              </div>
+              <div>
+                <label for="editStrictness">Edit strictness</label>
+                <select id="editStrictness">
+                  <option value="Change only the requested elements. Everything else should remain unchanged.">Strict</option>
+                  <option value="Keep the image mostly unchanged while allowing small natural adjustments for realism.">Balanced</option>
+                  <option value="Allow creative improvement while preserving the core identity and composition.">Creative</option>
+                </select>
+              </div>
+              <div>
+                <label for="identityStrength">Identity preservation</label>
+                <select id="identityStrength">
+                  <option value="very strong identity preservation">Very strong</option>
+                  <option value="strong identity preservation">Strong</option>
+                  <option value="moderate identity preservation">Moderate</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="section mode-panel" data-panel="fusion">
+            <h2>Fusion Mode controls</h2>
+            <div class="fields">
+              <div class="field full">
+                <label for="imageRoles">Image roles</label>
+                <textarea id="imageRoles" placeholder="Example: Image A is the person reference. Image B is the outfit reference. Image C is the environment reference."></textarea>
+              </div>
+              <div class="field full">
+                <label for="fusionGoal">Fusion goal</label>
+                <textarea id="fusionGoal" placeholder="Example: place the outfit from Image B onto the person from Image A in the environment from Image C"></textarea>
+              </div>
+              <div class="field full">
+                <label for="fusionRules">Fusion realism rules</label>
+                <textarea id="fusionRules" placeholder="Example: realistic fabric tension, correct seams, natural lighting match, no pasted-on look, preserve body proportions"></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="section mode-panel" data-panel="series">
+            <h2>Series Mode controls</h2>
+            <div class="fields">
+              <div>
+                <label for="seriesName">Series / project</label>
+                <input id="seriesName" placeholder="Example: Novak Artificial Transmission" />
+              </div>
+              <div>
+                <label for="sequence">Sequence</label>
+                <input id="sequence" placeholder="Example: 0042" />
+              </div>
+              <div class="field full">
+                <label for="characterLock">Continuity lock</label>
+                <textarea id="characterLock" placeholder="Example: preserve the same face, hair length, hair texture, height impression, clothing silhouette, and photographic style across the series"></textarea>
+              </div>
+              <div class="field full">
+                <label for="variationRule">Variation rule</label>
+                <textarea id="variationRule" placeholder="Example: vary the scene, pose, and lighting while keeping the character and visual universe consistent"></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="section mode-panel" data-panel="text">
+            <h2>Text / Poster Mode controls</h2>
+            <div class="fields">
+              <div class="field full">
+                <label for="exactText">Exact text to render</label>
+                <textarea id="exactText" placeholder='Example: "DREAM LOGIC"'></textarea>
+              </div>
+              <div>
+                <label for="textPlacement">Text placement</label>
+                <select id="textPlacement">
+                  <option value="centered near the bottom">Bottom center</option>
+                  <option value="centered in the middle">Center</option>
+                  <option value="top third of the composition">Top third</option>
+                  <option value="integrated into the product label">Product label</option>
+                  <option value="as clean UI text inside the design">UI text</option>
+                </select>
+              </div>
+              <div>
+                <label for="fontStyle">Typography</label>
+                <select id="fontStyle">
+                  <option value="tall condensed sans-serif typography, sharp and legible">Condensed sans</option>
+                  <option value="minimal modern sans-serif, clean hierarchy">Modern minimal</option>
+                  <option value="retro analog title lettering, slightly worn but readable">Retro analog</option>
+                  <option value="luxury serif typography, elegant spacing">Luxury serif</option>
+                  <option value="bold futuristic display type, crisp edges">Futuristic display</option>
+                </select>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="output-card">
+          <div class="output-top">
+            <div>
+              <h2>Generated prompt</h2>
+              <p class="hint">Copy this into Google’s image generator or use it as your final instruction block.</p>
+            </div>
+            <span class="score"><span class="dot"></span><span id="qualityLabel">Ready</span></span>
+          </div>
+          <div id="output" aria-live="polite"></div>
+          <div class="actions">
+            <button class="primary" id="copyBtn">Copy Prompt</button>
+            <button class="secondary" id="downloadBtn">Download .txt</button>
+            <button class="ghost" id="clearBtn">Clear</button>
+          </div>
+          <div class="mini-output">
+            <div class="mini">
+              <strong>Google tuning</strong>
+              <p id="tuningNote">Uses subject, context, purpose, camera, lighting, style, and constraints as separate instructions.</p>
+            </div>
+            <div class="mini">
+              <strong>Guardrails</strong>
+              <p id="guardrailNote">Rules are written positively where possible, with concise avoidances at the end.</p>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const panels = document.querySelectorAll('.mode-panel');
+    let currentMode = 'create';
+
+    const fieldIds = [
+      'subject','context','purpose','aspect','style','mood','camera','lighting','palette','detail','extraDetails',
+      'editChange','preserve','editStrictness','identityStrength','imageRoles','fusionGoal','fusionRules',
+      'seriesName','sequence','characterLock','variationRule','exactText','textPlacement','fontStyle',
+      'ruleNoText','ruleNoLogos','ruleNoWatermark','ruleNoSignage','ruleNoExtraLimbs','ruleNaturalHands'
+    ];
+
+    function val(id) {
+      const el = $(id);
+      if (!el) return '';
+      if (el.type === 'checkbox') return el.checked;
+      return String(el.value || '').trim();
+    }
+
+    function line(label, value) {
+      if (!value) return '';
+      return `${label}: ${value}.`;
+    }
+
+    function buildRules() {
+      const rules = [];
+      if (currentMode === 'text') {
+        rules.push('No extra text beyond the exact requested text. Keep all requested text correctly spelled and legible.');
+      } else if (val('ruleNoText')) {
+        rules.push('No text, words, letters, captions, or writing anywhere in the image.');
+      }
+      if (val('ruleNoLogos')) rules.push('No logos or brand marks.');
+      if (val('ruleNoWatermark')) rules.push('No watermark.');
+      if (val('ruleNoSignage')) rules.push('No visible signage.');
+      if (val('ruleNoExtraLimbs')) rules.push('No extra limbs, duplicate body parts, distorted anatomy, or unnatural proportions.');
+      if (val('ruleNaturalHands')) rules.push('Hands and fingers must look natural, relaxed, and anatomically correct.');
+      return rules.join(' ');
+    }
+
+    function buildBasePrompt() {
+      const parts = [];
+      parts.push(`Create an image for this purpose: ${val('purpose') || 'editorial image'}.`);
+      parts.push(line('Subject', val('subject')));
+      parts.push(line('Context / environment', val('context')));
+      parts.push(line('Visual style', val('style')));
+      parts.push(line('Mood', val('mood')));
+      parts.push(line('Camera and framing', val('camera')));
+      parts.push(line('Lighting', val('lighting')));
+      parts.push(line('Color palette', val('palette')));
+      parts.push(line('Detail level', val('detail')));
+      parts.push(line('Important details', val('extraDetails')));
+      parts.push(line('Aspect ratio', val('aspect')));
+      return parts.filter(Boolean).join('\n');
+    }
+
+    function buildPrompt() {
+      const rules = buildRules();
+      let prompt = '';
+
+      if (currentMode === 'create') {
+        prompt = `${buildBasePrompt()}\n\nComposition instruction: Make the image visually coherent, polished, and readable. Prioritize clear subject hierarchy, realistic camera logic, believable lighting, and intentional art direction.\n\nConstraints: ${rules}`;
+      }
+
+      if (currentMode === 'edit') {
+        prompt = `Edit the uploaded image using natural-language image editing.\n\nRequested change: ${val('editChange') || '[describe the exact change]'}\n\nPreserve: ${val('preserve') || 'the subject identity, face, pose, camera angle, lighting direction, background composition, and overall realism'}\n\nIdentity preservation: ${val('identityStrength')}.\nEdit strictness: ${val('editStrictness')}\n\n${buildBasePrompt()}\n\nRealism instruction: The edit should look native to the original image, with matching light, shadows, perspective, texture, and material behavior. Avoid a pasted-on or overprocessed look.\n\nConstraints: ${rules}`;
+      }
+
+      if (currentMode === 'fusion') {
+        prompt = `Use the uploaded reference images as separate visual inputs.\n\nImage roles: ${val('imageRoles') || 'Image A is the subject reference. Image B is the style, outfit, product, or object reference. Image C is optional environment reference.'}\n\nFusion goal: ${val('fusionGoal') || '[describe exactly what should be combined]'}\n\nFusion realism rules: ${val('fusionRules') || 'preserve the subject identity and proportions, match the lighting and perspective, create realistic material behavior, and avoid a pasted-on look'}\n\n${buildBasePrompt()}\n\nComposition instruction: Create one cohesive final image, not a collage. The final image should feel photographed or designed as a single intentional scene.\n\nConstraints: ${rules}`;
+      }
+
+      if (currentMode === 'series') {
+        prompt = `Create a new image in an ongoing visual series.\n\nSeries / project: ${val('seriesName') || '[series name]'}\nSequence: ${val('sequence') || '[sequence number]'}\n\nContinuity lock: ${val('characterLock') || 'preserve the same subject identity, visual style, camera language, and world rules across the series'}\n\nVariation rule: ${val('variationRule') || 'vary the moment, pose, lighting, and environment details while keeping the series visually consistent'}\n\n${buildBasePrompt()}\n\nSeries instruction: This image should feel like one entry from a larger coherent archive. Maintain continuity without making the frame repetitive.\n\nConstraints: ${rules}`;
+      }
+
+      if (currentMode === 'text') {
+        prompt = `Create a designed image with exact typography.\n\nExact text to render: ${val('exactText') || '"[TYPE EXACT TEXT HERE]"'}\nText placement: ${val('textPlacement')}.\nTypography: ${val('fontStyle')}.\n\n${buildBasePrompt()}\n\nTypography instruction: Render the exact requested text only. Keep spelling correct, edges crisp, hierarchy intentional, and the text integrated naturally into the composition.\n\nConstraints: ${rules}`;
+      }
+
+      return prompt.replace(/\n{3,}/g, '\n\n').trim();
+    }
+
+    function updateOutput() {
+      const prompt = buildPrompt();
+      $('output').textContent = prompt;
+      updateQuality(prompt);
+    }
+
+    function updateQuality(prompt) {
+      const hasSubject = val('subject').length > 8;
+      const hasContext = val('context').length > 8;
+      const hasDetail = val('extraDetails').length > 8 || currentMode !== 'create';
+      let score = [hasSubject, hasContext, hasDetail].filter(Boolean).length;
+      if (currentMode === 'edit' && val('editChange').length > 8) score++;
+      if (currentMode === 'fusion' && val('fusionGoal').length > 8) score++;
+      if (currentMode === 'text' && val('exactText').length > 2) score++;
+      if (score >= 4 || (currentMode === 'create' && score >= 3)) $('qualityLabel').textContent = 'Strong';
+      else if (score >= 2) $('qualityLabel').textContent = 'Good start';
+      else $('qualityLabel').textContent = 'Needs brief';
+    }
+
+    function showPanels() {
+      panels.forEach(panel => {
+        panel.classList.toggle('hidden', panel.dataset.panel !== currentMode);
+      });
+      $('tuningNote').textContent = {
+        create: 'Structured as subject, context, purpose, camera, lighting, style, details, and constraints.',
+        edit: 'Emphasizes preservation first, then the exact change, so edits stay controlled.',
+        fusion: 'Assigns clear roles to uploaded images so Google knows what each reference is for.',
+        series: 'Uses continuity locks and variation rules for recurring characters, bots, and archives.',
+        text: 'Uses quoted exact text and typography placement for legible poster or label outputs.'
+      }[currentMode];
+      $('guardrailNote').textContent = currentMode === 'text'
+        ? 'Allows only the exact requested text and blocks unwanted extra lettering.'
+        : 'Keeps no-text, no-logo, no-watermark, no-signage, and anatomy rules compact.';
+      updateOutput();
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      modeButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+      showPanels();
+    }
+
+    function toast(message) {
+      const t = $('toast');
+      t.textContent = message;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1500);
+    }
+
+    function applyPreset(name) {
+      const presets = {
+        'photoreal-fashion': {
+          subject: 'an adult woman with thick wavy hair, calm confident expression, wearing a sculptural high-fashion outfit with clean tailoring',
+          context: 'a refined urban street at golden hour, soft background compression, subtle reflections, no visible signage',
+          purpose: 'editorial image', aspect: '9:16 vertical', style: 'high-end fashion editorial, premium campaign look', mood: 'calm, refined, intentional', camera: '135mm telephoto, eye-level perspective, shallow depth of field', lighting: 'golden hour sunlight, long shadows, luminous highlights', palette: 'warm neutrals with one bold accent color', detail: 'richly detailed but visually readable', extraDetails: 'natural fabric folds, elegant posture, realistic skin texture, polished mirrorless sharpness'
+        },
+        'cinematic-environment': {
+          subject: 'no people; an atmospheric architectural environment with a strong visual focal point',
+          context: 'a cinematic interior or exterior space with layered depth, dramatic light, and tactile surfaces',
+          purpose: 'cinematic still', aspect: '16:9 widescreen', style: 'cinematic realism, film-still atmosphere', mood: 'eerie, elegant, quietly unsettling', camera: 'wide establishing shot with strong depth cues', lighting: 'dramatic rim light with rich shadow contrast', palette: 'muted shadows with controlled highlights', detail: 'ultra-detailed with layered textures', extraDetails: 'rich surface texture, atmospheric haze, strong foreground-middle-background separation'
+        },
+        'outfit-transfer': {
+          mode: 'fusion', subject: 'the person from Image A, preserving identity, body proportions, pose, hair, and camera angle', context: 'the environment from Image C if provided; otherwise preserve the original environment from Image A', purpose: 'editorial image', aspect: '9:16 vertical', style: 'photorealistic, polished mirrorless sharpness', mood: 'calm, refined, intentional', camera: '135mm telephoto, eye-level perspective, shallow depth of field', lighting: 'soft natural light with realistic shadows', palette: 'cohesive fashion color palette from the outfit reference', detail: 'richly detailed but visually readable', extraDetails: 'realistic fabric tension, seams, folds, weight, and contact shadows', imageRoles: 'Image A is the person reference. Image B is the outfit reference. Image C is the optional environment reference.', fusionGoal: 'dress the person from Image A in the outfit from Image B while preserving the person’s identity and pose', fusionRules: 'make the outfit fit naturally, match lighting and perspective, preserve anatomy and proportions, avoid a pasted-on look'
+        },
+        'noir-monochrome': {
+          subject: 'an adult subject with a confident expression, classic vintage styling, natural human posture', context: 'a gritty city street with brownstones, long shadows, and atmospheric depth', purpose: 'cinematic still', aspect: '9:16 vertical', style: 'cinematic realism, film-still atmosphere', mood: 'warm, nostalgic, emotionally grounded', camera: '50mm lens, natural human viewpoint', lighting: 'high contrast monochrome lighting', palette: 'black and white monochrome with rich grayscale tonality', detail: 'distressed, tactile, grainy, textured', extraDetails: 'golden hour translated into grayscale, luminous hair highlights, nostalgic noir atmosphere, no visible signage'
+        },
+        'clean-product': {
+          subject: 'a single premium product with clean geometry and tactile material detail', context: 'minimal studio setting with soft reflections and uncluttered background', purpose: 'product mockup', aspect: '1:1 square', style: 'clean commercial product photography', mood: 'bright, clean, optimistic', camera: '85mm portrait lens, natural compression, shallow depth of field', lighting: 'bright airy daylight, clean reflections', palette: 'clean neutral palette with one accent color', detail: 'simple, commercial, polished', extraDetails: 'sharp edges, realistic material texture, subtle shadow grounding, premium catalog presentation'
+        }
+      };
+
+      const p = presets[name];
+      if (!p) return;
+      if (p.mode) setMode(p.mode);
+      Object.keys(p).forEach(key => {
+        if (key === 'mode') return;
+        const el = $(key);
+        if (el) el.value = p[key];
+      });
+      updateOutput();
+      toast('Preset loaded');
+    }
+
+    function saveLocal() {
+      const data = { currentMode };
+      fieldIds.forEach(id => {
+        const el = $(id);
+        if (!el) return;
+        data[id] = el.type === 'checkbox' ? el.checked : el.value;
+      });
+      localStorage.setItem('googleImagePromptStudio', JSON.stringify(data));
+      toast('Settings saved');
+    }
+
+    function loadLocal() {
+      const raw = localStorage.getItem('googleImagePromptStudio');
+      if (!raw) return toast('No saved settings yet');
+      const data = JSON.parse(raw);
+      fieldIds.forEach(id => {
+        const el = $(id);
+        if (!el || data[id] === undefined) return;
+        if (el.type === 'checkbox') el.checked = data[id];
+        else el.value = data[id];
+      });
+      setMode(data.currentMode || 'create');
+      toast('Settings loaded');
+    }
+
+    async function copyPrompt() {
+      await navigator.clipboard.writeText($('output').textContent);
+      toast('Prompt copied');
+    }
+
+    function downloadPrompt() {
+      const blob = new Blob([$('output').textContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `google-image-prompt-${currentMode}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast('Prompt downloaded');
+    }
+
+    function clearFields() {
+      fieldIds.forEach(id => {
+        const el = $(id);
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = true;
+        else if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
+      });
+      setMode('create');
+      updateOutput();
+      toast('Cleared');
+    }
+
+    modeButtons.forEach(btn => btn.addEventListener('click', () => setMode(btn.dataset.mode)));
+    document.querySelectorAll('.preset').forEach(btn => btn.addEventListener('click', () => applyPreset(btn.dataset.preset)));
+    fieldIds.forEach(id => {
+      const el = $(id);
+      if (el) el.addEventListener('input', updateOutput);
+      if (el) el.addEventListener('change', updateOutput);
+    });
+
+    $('copyBtn').addEventListener('click', copyPrompt);
+    $('downloadBtn').addEventListener('click', downloadPrompt);
+    $('clearBtn').addEventListener('click', clearFields);
+    $('saveLocalBtn').addEventListener('click', saveLocal);
+    $('loadLocalBtn').addEventListener('click', loadLocal);
+
+    showPanels();
+    updateOutput();
+  </script>
+</body>
+</html>
