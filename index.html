@@ -60,7 +60,7 @@
             --header-bg: #0d0d0d;
         }
 
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; transition: background 0.2s, color 0.2s; }
+        * { box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; transition: background 0.2s, color 0.2s, border-color 0.2s; }
 
         body {
             background-color: var(--bg);
@@ -91,7 +91,24 @@
             background: var(--header-bg);
             border-radius: 12px;
             border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
+
+        h1 { margin: 0; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px; }
+
+        .theme-selector select, button, .tab {
+            background: var(--input);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+            font-size: 13px;
+        }
+
+        button:hover { background: var(--border); }
+        button.primary { background: var(--accent); color: white; border: none; font-weight: 600; }
 
         .card {
             background: var(--card);
@@ -102,259 +119,515 @@
             margin-bottom: 20px;
         }
 
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab {
-            padding: 8px 16px; border-radius: 8px; cursor: pointer; background: var(--input);
-            border: 1px solid var(--border); font-size: 13px;
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
+
         .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-        .collapsible { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
-        .collapsible-header {
-            padding: 12px 16px; background: var(--input); cursor: pointer;
-            display: flex; justify-content: space-between; font-weight: 600; font-size: 14px;
+        .collapsible {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
         }
-        .collapsible-content { padding: 20px; display: none; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .collapsible-header {
+            padding: 12px 16px;
+            background: var(--input);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .collapsible-content {
+            padding: 20px;
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
         .collapsible.active .collapsible-content { display: grid; }
 
         .field { display: flex; flex-direction: column; gap: 6px; }
         .field.full { grid-column: 1 / -1; }
-        label { font-size: 11px; opacity: 0.6; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        label { font-size: 11px; opacity: 0.6; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px; }
 
         select, input, textarea {
-            width: 100%; padding: 10px; background: var(--input); border: 1px solid var(--border);
-            color: var(--text); border-radius: 6px; font-size: 14px;
+            width: 100%;
+            padding: 10px;
+            background: var(--input);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
+            font-size: 14px;
         }
 
-        .color-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-        .color-pill {
-            width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
-            border: 2px solid transparent; box-shadow: 0 0 0 1px var(--border);
-        }
-        .color-pill.selected { border-color: var(--text); transform: scale(1.2); }
+        textarea { height: 70px; resize: vertical; }
 
-        .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 5px;
+        }
+
         .chip {
-            padding: 5px 12px; border-radius: 100px; background: var(--input);
-            border: 1px solid var(--border); font-size: 12px; cursor: pointer;
+            padding: 5px 12px;
+            border-radius: 100px;
+            background: var(--input);
+            border: 1px solid var(--border);
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-        .chip.selected { background: var(--accent); color: white; }
 
-        .gender-toggle {
-            display: flex; background: var(--input); border-radius: 8px; padding: 4px; gap: 4px; margin-bottom: 15px;
+        .chip.selected {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
-        .gender-btn {
-            flex: 1; padding: 8px; border-radius: 6px; cursor: pointer; text-align: center;
-            font-weight: 600; font-size: 13px; border: none; background: transparent; color: var(--text);
+
+        /* Color Pills */
+        .color-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
         }
-        .gender-btn.active { background: var(--accent); color: white; }
+
+        .color-pill {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            box-shadow: 0 0 0 1px var(--border);
+        }
+
+        .color-pill.selected {
+            border-color: var(--text);
+            transform: scale(1.1);
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            grid-column: 1 / -1;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .checkbox-item input { width: auto; cursor: pointer; }
+
+        .output-panel {
+            position: sticky;
+            top: 20px;
+        }
 
         #generatedPrompt {
-            background: #000; color: #d1d5db; font-family: monospace; font-size: 13px;
-            padding: 20px; border-radius: 8px; height: 500px; overflow-y: auto; white-space: pre-wrap;
+            background: #000;
+            color: #d1d5db;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            padding: 20px;
+            border-radius: 8px;
+            height: 520px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            white-space: pre-wrap;
         }
 
-        .hidden { display: none !important; }
+        .health-bar {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .output-panel { position: static; }
+        }
     </style>
 </head>
-<body>
+<body data-theme="Dark Tech">
 
 <div class="container">
     <header>
-        <h1>Google <span style="color:var(--accent)">Studio</span></h1>
-        <select id="themeSelect" onchange="changeTheme(this.value)">
-            <option>Dark Tech</option><option>Light Studio</option><option>Noir Mono</option><option>Warm Analog</option><option>Neon Future</option>
-        </select>
+        <h1>Google <span style="color:var(--accent)">Image Prompt</span> Studio</h1>
+        <div class="theme-selector">
+            <select id="themeSelect" onchange="changeTheme(this.value)">
+                <option>Dark Tech</option>
+                <option>Light Studio</option>
+                <option>Noir Mono</option>
+                <option>Warm Analog</option>
+                <option>Neon Future</option>
+            </select>
+        </div>
     </header>
 
     <main>
         <div class="card">
-            <div class="tabs">
-                <div class="tab active" onclick="setMode('create')">Create</div>
-                <div class="tab" onclick="setMode('edit')">Edit</div>
-                <div class="tab" onclick="setMode('text')">Text</div>
+            <div class="tabs" id="modeTabs">
+                <div class="tab active" data-mode="create" onclick="setMode('create')">Create Mode</div>
+                <div class="tab" data-mode="edit" onclick="setMode('edit')">Edit Mode</div>
+                <div class="tab" data-mode="fusion" onclick="setMode('fusion')">Fusion Mode</div>
+                <div class="tab" data-mode="series" onclick="setMode('series')">Series Mode</div>
+                <div class="tab" data-mode="text" onclick="setMode('text')">Text / Poster</div>
             </div>
 
-            <div class="gender-toggle">
-                <button class="gender-btn active" id="btnWoman" onclick="setGender('woman')">👩 Woman</button>
-                <button class="gender-btn" id="btnMan" onclick="setGender('man')">👨 Man</button>
+            <div class="chip-group" style="margin-bottom: 20px;">
+                <label style="width: 100%;">Presets</label>
+                <div class="chip" onclick="applyPreset('fashion')">👗 Fashion Portrait</div>
+                <div class="chip" onclick="applyPreset('noir')">🕶️ Noir Street</div>
+                <div class="chip" onclick="applyPreset('nature')">🌲 Nature Cinema</div>
+                <div class="chip" onclick="applyPreset('cyber')">🦾 Cyber Poster</div>
+                <div class="chip" onclick="applyPreset('product')">📦 Product Mockup</div>
             </div>
 
-            <div class="collapsible active">
-                <div class="collapsible-header">Subject & Identity</div>
+            <div id="modeControls" class="collapsible active" style="border-color: var(--accent);">
+                <div class="collapsible-header">Mode Controls <span id="modeName">Create</span></div>
+                <div class="collapsible-content" id="modeContent">
+                    </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Subject / Identity</div>
                 <div class="collapsible-content">
                     <div class="field">
-                        <label>Age 🎂</label>
+                        <label>Gender 👥</label>
+                        <select id="sub_gender">
+                            <option value="">- Select -</option>
+                            <option value="woman">woman</option>
+                            <option value="man">man</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Age Range 🎂</label>
                         <select id="sub_age">
                             <option value="">- Select -</option>
-                            <option>early 20s</option><option>30s</option><option>40s</option><option>50s</option><option>elderly</option>
+                            <option>early 20s</option><option>mid 20s</option><option>late 20s</option>
+                            <option>early 30s</option><option>mid 30s</option><option>late 30s</option>
+                            <option>40s</option><option>50s</option><option>60s</option><option>elderly</option>
                         </select>
                     </div>
                     <div class="field">
                         <label>Expression 🎭</label>
                         <select id="sub_expr">
                             <option value="">- Select -</option>
-                            <option>calm 😌</option><option>confident 😎</option><option>serious 😐</option><option>joyful 😊</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="collapsible">
-                <div class="collapsible-header">Hair & Grooming</div>
-                <div class="collapsible-content">
-                    <div class="field full">
-                        <label>Hair Color 🎨</label>
-                        <div class="color-group" id="hairColors">
-                            </div>
-                    </div>
-                    <div class="field gender-woman">
-                        <label>Style (Woman) 💇‍♀️</label>
-                        <select id="hair_woman">
-                            <option value="">- Select -</option>
-                            <option>long flowing waves</option><option>sleek high ponytail</option><option>messy bun</option><option>bob cut</option><option>pixie cut</option>
-                        </select>
-                    </div>
-                    <div class="field gender-man hidden">
-                        <label>Style (Man) 💇‍♂️</label>
-                        <select id="hair_man">
-                            <option value="">- Select -</option>
-                            <option>classic side part</option><option>textured pompadour</option><option>buzz cut</option><option>taper fade</option><option>man bun</option>
-                        </select>
-                    </div>
-                    <div class="field gender-man hidden">
-                        <label>Facial Hair 🧔</label>
-                        <select id="sub_beard">
-                            <option value="">- Select -</option>
-                            <option>clean shaven</option><option>stubble</option><option>full beard</option><option>groomed mustache</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="collapsible">
-                <div class="collapsible-header">Clothing & Style</div>
-                <div class="collapsible-content">
-                    <div class="field full">
-                        <label>Theme Palette 🌈</label>
-                        <div class="color-group" id="themeColors"></div>
-                    </div>
-                    <div class="field gender-woman">
-                        <label>Apparel 👗</label>
-                        <select id="wear_woman">
-                            <option value="">- Select -</option>
-                            <option>evening gown 👗</option><option>oversized blazer & trousers 🧥</option><option>summer sundress 👗</option><option>leather jacket & skinny jeans 🧥</option>
-                        </select>
-                    </div>
-                    <div class="field gender-man hidden">
-                        <label>Apparel 👔</label>
-                        <select id="wear_man">
-                            <option value="">- Select -</option>
-                            <option>tailored three-piece suit 👔</option><option>denim jacket & chinos 🧥</option><option>hoodie & joggers 👟</option><option>turtleneck & overcoat 🧥</option>
+                            <option>calm 😌</option><option>confident 😎</option><option>introspective 🤔</option>
+                            <option>mysterious 🤫</option><option>serious 😐</option><option>warm smile 😊</option>
+                            <option>intense 👁️</option><option>commanding 🤨</option>
                         </select>
                     </div>
                     <div class="field">
-                        <label>Shoes 👟</label>
-                        <select id="sub_shoes">
+                        <label>Visual Heritage 🌍</label>
+                        <select id="sub_ethnic">
                             <option value="">- Select -</option>
-                            <option>sleek boots 👢</option><option>designer sneakers 👟</option><option>formal dress shoes 👞</option><option>minimalist sandals 🩴</option>
+                            <option>East Asian</option><option>Southeast Asian</option><option>South Asian</option>
+                            <option>Middle Eastern</option><option>North African</option><option>Black / African diaspora</option>
+                            <option>Latino / Hispanic</option><option>White / Caucasian</option><option>Mixed heritage</option>
                         </select>
+                    </div>
+                    <div class="field full">
+                        <label>Override Subject Notes ✏️</label>
+                        <textarea id="sub_custom" placeholder="Specific unique traits..."></textarea>
                     </div>
                 </div>
             </div>
 
             <div class="collapsible">
-                <div class="collapsible-header">Environment & Lighting</div>
+                <div class="collapsible-header">Hair & Face Details</div>
                 <div class="collapsible-content">
-                    <div class="field"><label>Location 📍</label><select id="env_loc"><option>city street 🏙️</option><option>minimalist studio 📸</option><option>lush forest 🌲</option></select></div>
-                    <div class="field"><label>Light 💡</label><select id="lit_type"><option>golden hour 🌇</option><option>soft studio light 💡</option><option>neon glow 🌈</option></select></div>
+                    <div class="field full">
+                        <label>Hair Color</label>
+                        <div class="color-group" id="hair_color_pills">
+                            <div class="color-pill" style="background:#000" data-val="black" title="Black"></div>
+                            <div class="color-pill" style="background:#4b3621" data-val="dark brown" title="Dark Brown"></div>
+                            <div class="color-pill" style="background:#a52a2a" data-val="auburn" title="Auburn"></div>
+                            <div class="color-pill" style="background:#f5deb3" data-val="blonde" title="Blonde"></div>
+                            <div class="color-pill" style="background:#e5e4e2" data-val="platinum" title="Platinum"></div>
+                            <div class="color-pill" style="background:#aaa" data-val="silver" title="Silver"></div>
+                            <div class="color-pill" style="background:#fff" data-val="white" title="White"></div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Hair Style 💇</label>
+                        <select id="sub_h_style">
+                            <option value="">- Select -</option>
+                            <option>loose and down</option><option>pulled back</option><option>ponytail</option>
+                            <option>bun</option><option>side part</option><option>swept back</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Hair Texture 🌀</label>
+                        <select id="sub_h_tex"><option value="">- Select -</option><option>straight</option><option>wavy</option><option>loose curls</option><option>tight curls</option><option>coily</option><option>sleek</option></select>
+                    </div>
+                    <div class="field full">
+                        <label>Eye Color</label>
+                        <div class="color-group" id="eye_color_pills">
+                            <div class="color-pill" style="background:#634e34" data-val="brown" title="Brown"></div>
+                            <div class="color-pill" style="background:#497665" data-val="green" title="Green"></div>
+                            <div class="color-pill" style="background:#527188" data-val="blue" title="Blue"></div>
+                            <div class="color-pill" style="background:#8e7618" data-val="amber" title="Amber"></div>
+                            <div class="color-pill" style="background:#808080" data-val="gray" title="Gray"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Clothing & Footwear</div>
+                <div class="collapsible-content">
+                    <div class="field">
+                        <label>Outfit Style 🧥</label>
+                        <select id="sub_outfit_style"><option value="">- Select -</option><option>minimalist</option><option>streetwear</option><option>luxury fashion</option><option>cyberpunk</option><option>vintage</option><option>noir</option></select>
+                    </div>
+                    <div class="field">
+                        <label>Footwear / Shoes 👟</label>
+                        <select id="sub_shoes">
+                            <option value="">- Select -</option>
+                            <option>sleek leather boots 👢</option>
+                            <option>designer sneakers 👟</option>
+                            <option>elegant high heels 👠</option>
+                            <option>formal oxford shoes 👞</option>
+                            <option>minimalist sandals 🩴</option>
+                            <option>rugged combat boots 🥾</option>
+                            <option>barefoot 👣</option>
+                        </select>
+                    </div>
+                    <div class="field full">
+                        <label>Outfit Pieces</label>
+                        <div class="chip-group" id="outfit_chips">
+                            <div class="chip" data-val="trench coat">🧥 trench coat</div>
+                            <div class="chip" data-val="leather jacket">🧥 leather jacket</div>
+                            <div class="chip" data-val="oversized sweater">🧶 oversized sweater</div>
+                            <div class="chip" data-val="blazer">🧥 blazer</div>
+                            <div class="chip" data-val="trousers">👖 trousers</div>
+                            <div class="chip" data-val="jeans">👖 jeans</div>
+                            <div class="chip" data-val="sunglasses">🕶️ sunglasses</div>
+                        </div>
+                    </div>
+                    <div class="field full"><label>Specific Outfit Notes</label><textarea id="outfit_custom"></textarea></div>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Environment & Weather</div>
+                <div class="collapsible-content">
+                    <div class="field">
+                        <label>Location 📍</label>
+                        <select id="env_loc"><option value="">- Select -</option><option>city street 🏙️</option><option>rooftop 🌇</option><option>cafe interior ☕</option><option>subway platform 🚇</option><option>forest 🌲</option><option>desert 🏜️</option><option>minimalist studio 📸</option></select>
+                    </div>
+                    <div class="field">
+                        <label>Time ⏰</label>
+                        <select id="env_time"><option value="">- Select -</option><option>dawn 🌅</option><option>morning ☀️</option><option>golden hour 🌇</option><option>blue hour 🌃</option><option>night 🌙</option></select>
+                    </div>
+                    <div class="field full">
+                        <label>Weather ☁️</label>
+                        <select id="env_weather"><option value="">- Select -</option><option>clear skies ☀️</option><option>overcast ☁️</option><option>foggy 🌫️</option><option>rainy 🌧️</option><option>snowing ❄️</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Camera & Lighting</div>
+                <div class="collapsible-content">
+                    <div class="field">
+                        <label>Shot Size 📷</label>
+                        <select id="cam_shot"><option value="">- Select -</option><option>close-up</option><option>head and shoulders</option><option>half body</option><option>full body</option><option>wide shot</option></select>
+                    </div>
+                    <div class="field">
+                        <label>Lens 🔎</label>
+                        <select id="cam_lens"><option value="">- Select -</option><option>35mm documentary</option><option>50mm natural</option><option>85mm portrait</option><option>24mm wide</option></select>
+                    </div>
+                    <div class="field full">
+                        <label>Lighting Type 💡</label>
+                        <select id="lit_type"><option value="">- Select -</option><option>soft natural light</option><option>neon glow</option><option>dramatic rim light</option><option>high contrast sunlight</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapsible">
+                <div class="collapsible-header">Global Rules</div>
+                <div class="collapsible-content">
+                    <div class="checkbox-grid" id="globalRules">
+                        <label class="checkbox-item"><input type="checkbox" data-rule="No text" checked> No text</label>
+                        <label class="checkbox-item"><input type="checkbox" data-rule="No logos" checked> No logos</label>
+                        <label class="checkbox-item"><input type="checkbox" data-rule="No extra limbs" checked> No extra limbs</label>
+                        <label class="checkbox-item"><input type="checkbox" data-rule="Natural hands and fingers" checked> Natural hands</label>
+                        <label class="checkbox-item"><input type="checkbox" data-rule="No cropped feet when full body is requested" checked> Full feet visible</label>
+                        <label class="checkbox-item"><input type="checkbox" data-rule="No cartoon look" checked> No cartoon</label>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <aside>
-        <div class="card" style="position: sticky; top: 20px;">
-            <label>Generated Prompt</label>
-            <div id="generatedPrompt">Press "Generate"...</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+    <aside class="output-panel">
+        <div class="card">
+            <label>Studio Output</label>
+            <div id="generatedPrompt">Configure your settings and click "Generate"...</div>
+            <div id="healthBar" class="health-bar"></div>
+            <div class="actions-grid">
                 <button class="primary" style="grid-column: span 2;" onclick="generate()">Generate Prompt</button>
-                <button onclick="copyText()">Copy</button>
-                <button onclick="reset()">Reset</button>
+                <button onclick="copyPrompt()">Copy</button>
+                <button onclick="downloadPrompt()">Download</button>
+                <button onclick="resetForm()">Clear</button>
+                <button onclick="saveSession()">Save</button>
             </div>
         </div>
     </aside>
 </div>
 
 <script>
-    let currentGender = 'woman';
-    const hairColors = [
-        {n:'Black', c:'#000'}, {n:'Dark Brown', c:'#3d2314'}, {n:'Light Brown', c:'#7a5c3d'},
-        {n:'Platinum', c:'#e5e4e2'}, {n:'Golden Blonde', c:'#e2bc74'}, {n:'Auburn', c:'#71231d'},
-        {n:'Copper', c:'#b87333'}, {n:'Silver', c:'#c0c0c0'}, {n:'Burgundy', c:'#800020'},
-        {n:'Midnight Blue', c:'#191970'}, {n:'Forest Green', c:'#228b22'}
-    ];
-    const themeColors = [
-        {n:'Neutral', c:'#d2b48c'}, {n:'Crimson', c:'#dc143c'}, {n:'Emerald', c:'#50c878'},
-        {n:'Royal Blue', c:'#4169e1'}, {n:'Lavender', c:'#e6e6fa'}, {n:'Amber', c:'#ffbf00'},
-        {n:'Slate', c:'#708090'}, {n:'Monochrome', c:'#333'}
-    ];
+    const modeConfigs = {
+        create: { title: "Create Mode", fields: `<div class="field full"><label>Purpose</label><select id="mode_purpose"><option>Cinematic Still</option><option>Editorial Portrait</option><option>Product Mockup</option></select></div>` },
+        edit: { title: "Edit Mode", fields: `<div class="field full"><label>Edit Instructions</label><textarea id="mode_edit_inst" placeholder="e.g., Change the shoes to red sneakers..."></textarea></div>` },
+        fusion: { title: "Fusion Mode", fields: `<div class="field full"><label>Fusion Goal</label><textarea id="mode_fuse_inst" placeholder="Combine A and B..."></textarea></div>` },
+        series: { title: "Series Mode", fields: `<div class="field full"><label>Continuity Notes</label><textarea id="mode_series_inst" placeholder="Keep character features consistent..."></textarea></div>` },
+        text: { title: "Text Mode", fields: `<div class="field full"><label>Exact Text</label><input type="text" id="mode_text_val" placeholder="TITLE"></div>` }
+    };
 
-    function initColors(id, list) {
-        const container = document.getElementById(id);
-        list.forEach(item => {
-            const pill = document.createElement('div');
-            pill.className = 'color-pill';
-            pill.style.background = item.c;
-            pill.title = item.n;
-            pill.dataset.val = item.n;
-            pill.onclick = () => {
-                container.querySelectorAll('.color-pill').forEach(p => p.classList.remove('selected'));
-                pill.classList.add('selected');
-            };
-            container.appendChild(pill);
+    let currentMode = 'create';
+
+    // UI Logic for Collapsibles and Chips
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+        header.addEventListener('click', () => header.parentElement.classList.toggle('active'));
+    });
+
+    document.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => chip.classList.toggle('selected'));
+    });
+
+    // Color Pill Selection Logic
+    document.querySelectorAll('.color-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            const parent = pill.parentElement;
+            parent.querySelectorAll('.color-pill').forEach(p => p.classList.remove('selected'));
+            pill.classList.add('selected');
         });
+    });
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+        document.getElementById('modeName').innerText = modeConfigs[mode].title;
+        document.getElementById('modeContent').innerHTML = modeConfigs[mode].fields;
     }
 
-    function setGender(g) {
-        currentGender = g;
-        document.getElementById('btnWoman').classList.toggle('active', g === 'woman');
-        document.getElementById('btnMan').classList.toggle('active', g === 'man');
-        document.querySelectorAll('.gender-woman').forEach(el => el.classList.toggle('hidden', g !== 'woman'));
-        document.querySelectorAll('.gender-man').forEach(el => el.classList.toggle('hidden', g !== 'man'));
+    function changeTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
     }
 
     function generate() {
-        const get = id => document.getElementById(id).value;
-        const color = id => document.querySelector(`#${id} .selected`)?.dataset.val || '';
-        
-        let p = `Create an image of a ${currentGender} in their ${get('sub_age') || 'adult years'}.\n\n`;
-        
-        let hair = currentGender === 'woman' ? get('hair_woman') : get('hair_man');
-        let hCol = color('hairColors');
-        p += `Subject Details:\nA ${currentGender} with ${hCol} ${hair}. `;
-        if (currentGender === 'man' && get('sub_beard')) p += `Facial hair: ${get('sub_beard')}. `;
-        p += `Expression: ${get('sub_expr')}.\n\n`;
+        const val = (id) => document.getElementById(id)?.value || '';
+        const check = (id) => document.getElementById(id)?.checked;
+        const color = (parentId) => document.querySelector(`#${parentId} .color-pill.selected`)?.dataset.val || '';
+        const chips = (id) => Array.from(document.querySelectorAll(`#${id} .chip.selected`)).map(c => c.dataset.val).join(', ');
 
-        let apparel = currentGender === 'woman' ? get('wear_woman') : get('wear_man');
-        p += `Style:\nWearing ${apparel} in a ${color('themeColors')} color palette. Footwear: ${get('sub_shoes')}.\n\n`;
+        let p = `Create an image for this purpose: ${val('mode_purpose') || 'High-fidelity visual'}.\n\n`;
+
+        if (currentMode === 'edit') p = `Edit the uploaded image.\nInstructions: ${val('mode_edit_inst')}\n\n`;
+        if (currentMode === 'text') p = `Text requirement: Render exactly "${val('mode_text_val')}". No extra text.\n\n`;
+
+        // Subject
+        let subStr = `Subject:\nA ${val('sub_gender') || 'person'} in their ${val('sub_age') || 'adult years'}`;
+        if (val('sub_ethnic')) subStr += ` of ${val('sub_ethnic')} visual heritage`;
+        if (val('sub_expr')) subStr += ` with a ${val('sub_expr').split(' ')[0]} expression`;
         
-        p += `Setting:\nLocation: ${get('env_loc')}. Lighting: ${get('lit_type')}.\n\n`;
-        p += `Constraints:\nNo text, no logos, natural anatomy, high-fidelity photorealism.`;
+        let hCol = color('hair_color_pills');
+        if (hCol || val('sub_h_style')) {
+            subStr += `, featuring ${hCol} ${val('sub_h_tex')} ${val('sub_h_style')} hair`;
+        }
+
+        let eCol = color('eye_color_pills');
+        if (eCol) subStr += ` and striking ${eCol} eyes`;
+        
+        p += subStr + ".\n";
+        if (val('sub_custom')) p += `${val('sub_custom')}\n`;
+
+        // Footwear & Clothes
+        let outfit = chips('outfit_chips');
+        if (outfit || val('sub_shoes') || val('sub_outfit_style')) {
+            p += `Styling: ${val('sub_outfit_style')} aesthetic. Wearing ${outfit}. Footwear: ${val('sub_shoes')}.\n`;
+        }
+        if (val('outfit_custom')) p += `${val('outfit_custom')}\n`;
+
+        p += `\nEnvironment:\n${val('env_loc')} at ${val('env_time')} during ${val('env_weather')}.\n\n`;
+        p += `Camera:\n${val('cam_shot')} shot using ${val('cam_lens')} lens. Lighting: ${val('lit_type')}.\n\n`;
+
+        let rules = [];
+        document.querySelectorAll('#globalRules input:checked').forEach(i => rules.push(i.dataset.rule));
+        p += `Constraints:\n- ${rules.join('\n- ')}\n\n`;
+        p += `Composition:\nEnsure visual hierarchy and realistic art direction.`;
 
         document.getElementById('generatedPrompt').textContent = p;
+        runHealthCheck();
     }
 
-    document.querySelectorAll('.collapsible-header').forEach(h => {
-        h.onclick = () => h.parentElement.classList.toggle('active');
-    });
+    function runHealthCheck() {
+        const hb = document.getElementById('healthBar');
+        let warns = [];
+        if (!document.getElementById('sub_gender').value) warns.push("Define gender (Man/Woman).");
+        if (!document.getElementById('env_loc').value) warns.push("Location is empty.");
+        if (warns.length > 0) {
+            hb.style.display = "block";
+            hb.innerHTML = "<strong>Quality Check:</strong><br>• " + warns.join('<br>• ');
+        } else {
+            hb.style.display = "none";
+        }
+    }
 
-    function changeTheme(t) { document.body.setAttribute('data-theme', t); }
-    function copyText() { navigator.clipboard.writeText(document.getElementById('generatedPrompt').textContent); alert('Copied!'); }
-    function reset() { location.reload(); }
+    function applyPreset(type) {
+        resetForm();
+        if (type === 'fashion') {
+            document.getElementById('sub_gender').value = 'woman';
+            document.getElementById('sub_outfit_style').value = 'luxury fashion';
+            document.getElementById('cam_shot').value = 'full body';
+            document.getElementById('sub_shoes').value = 'elegant high heels 👠';
+        }
+        generate();
+    }
 
-    initColors('hairColors', hairColors);
-    initColors('themeColors', themeColors);
+    function copyPrompt() {
+        navigator.clipboard.writeText(document.getElementById('generatedPrompt').textContent);
+        alert("Prompt copied!");
+    }
+
+    function resetForm() {
+        document.querySelectorAll('select, input, textarea').forEach(el => el.value = '');
+        document.querySelectorAll('.chip, .color-pill').forEach(el => el.classList.remove('selected'));
+        generate();
+    }
+
+    window.onload = () => setMode('create');
 </script>
 </body>
 </html>
